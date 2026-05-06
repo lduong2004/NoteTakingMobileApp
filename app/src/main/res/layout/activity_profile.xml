@@ -12,8 +12,8 @@
         android:id="@+id/btn_back"
         android:layout_width="32dp"
         android:layout_height="32dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="56dp"
         android:padding="4dp"
         android:src="@drawable/ic_close"
         app:layout_constraintStart_toStartOf="parent"
@@ -30,8 +30,10 @@
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="@id/btn_back"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/btn_back" />
+        app:layout_constraintTop_toTopOf="@id/btn_back"
+        app:layout_constraintVertical_bias="0.0" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cv_profile_image"
@@ -57,7 +59,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:fontFamily="@font/nunito_bold"
-        android:text="User Name"
+        android:text="Tên người dùng"
         android:textColor="@color/text_bold"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -110,7 +112,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_weight="1"
                 android:fontFamily="@font/nunito_bold"
-                android:text="Buy Premium"
+                android:text="Mua Cá vàng premium"
                 android:textColor="@color/text_bold"
                 android:textSize="18sp" />
         </LinearLayout>
@@ -131,7 +133,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/nunito_bold"
-                android:text="Edit Profile"
+                android:text="Chỉnh sửa thông tin"
                 android:textColor="@color/text_bold"
                 android:textSize="18sp" />
         </LinearLayout>
@@ -144,7 +146,7 @@
             android:layout_marginTop="24dp"
             android:fontFamily="@font/nunito_black"
             android:padding="12dp"
-            android:text="Log Out"
+            android:text="Đăng xuất"
             android:textColor="@color/primary"
             android:textSize="18sp" />
 

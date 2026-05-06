@@ -21,9 +21,15 @@ import java.util.List;
 
 public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
     private List<FirebaseNote> notes;
+    private OnNoteListener onNoteListener;
 
-    public NoteAdapter(List<FirebaseNote> notes) {
+    public interface OnNoteListener {
+        void onDeleteClick(FirebaseNote note);
+    }
+
+    public NoteAdapter(List<FirebaseNote> notes, OnNoteListener onNoteListener) {
         this.notes = notes;
+        this.onNoteListener = onNoteListener;
     }
 
     @NonNull
@@ -39,17 +45,27 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
         holder.tvContent.setText(note.getContent());
 
         if (note.getDrawingData() != null && !note.getDrawingData().isEmpty()) {
-            byte[] decodedString = Base64.decode(note.getDrawingData(), Base64.DEFAULT);
-            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-            holder.imgPreview.setImageBitmap(decodedByte);
+            try {
+                byte[] decodedString = Base64.decode(note.getDrawingData(), Base64.DEFAULT);
+                Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                holder.imgPreview.setImageBitmap(decodedByte);
+            } catch (Exception e) {
+                holder.imgPreview.setImageResource(R.drawable.ic_get_started);
+            }
         } else {
-            holder.imgPreview.setImageResource(R.drawable.ic_get_started); // Placeholder
+            holder.imgPreview.setImageResource(R.drawable.ic_get_started);
         }
 
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(v.getContext(), EditNote.class);
             intent.putExtra("NOTE_ID", note.getId());
             v.getContext().startActivity(intent);
+        });
+
+        holder.btnDelete.setOnClickListener(v -> {
+            if (onNoteListener != null) {
+                onNoteListener.onDeleteClick(note);
+            }
         });
     }
 
@@ -59,13 +75,14 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView imgPreview;
+        ImageView imgPreview, btnDelete;
         TextView tvContent;
 
         public ViewHolder(View v) {
             super(v);
             imgPreview = v.findViewById(R.id.imgPreview);
             tvContent = v.findViewById(R.id.tvContent);
+            btnDelete = v.findViewById(R.id.btnDelete);
         }
     }
 }

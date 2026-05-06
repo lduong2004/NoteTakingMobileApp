@@ -3,9 +3,9 @@ package com.example.notetakingmobileapp.Activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -43,7 +43,13 @@ public class RecentNotes extends AppCompatActivity {
         rvNotes.setLayoutManager(new LinearLayoutManager(this));
         
         noteList = new ArrayList<>();
-        adapter = new NoteAdapter(noteList);
+        // Khởi tạo adapter với listener cho việc xóa note
+        adapter = new NoteAdapter(noteList, new NoteAdapter.OnNoteListener() {
+            @Override
+            public void onDeleteClick(FirebaseNote note) {
+                showDeleteDialog(note);
+            }
+        });
         rvNotes.setAdapter(adapter);
 
         findViewById(R.id.fabAdd).setOnClickListener(v -> {
@@ -53,6 +59,24 @@ public class RecentNotes extends AppCompatActivity {
         findViewById(R.id.imv_menu).setOnClickListener(v -> {
             startActivity(new Intent(this, Profile.class));
         });
+    }
+
+    private void showDeleteDialog(FirebaseNote note) {
+        new AlertDialog.Builder(this)
+                .setTitle("Delete Note")
+                .setMessage("Are you sure you want to delete this note?")
+                .setPositiveButton("Delete", (dialog, which) -> deleteNote(note))
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void deleteNote(FirebaseNote note) {
+        if (note.getId() == null) return;
+
+        db.collection("notes").document(note.getId())
+                .delete()
+                .addOnSuccessListener(aVoid -> Toast.makeText(RecentNotes.this, "Note deleted", Toast.LENGTH_SHORT).show())
+                .addOnFailureListener(e -> Toast.makeText(RecentNotes.this, "Error deleting note", Toast.LENGTH_SHORT).show());
     }
 
     @Override
