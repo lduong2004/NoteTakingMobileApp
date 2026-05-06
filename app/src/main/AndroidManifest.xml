@@ -21,6 +21,9 @@
             android:name=".Activities.Profile"
             android:exported="false" />
         <activity
+            android:name=".Activities.EditProfile"
+            android:exported="false" />
+        <activity
             android:name=".Activities.EditNote"
             android:exported="false" />
         <activity

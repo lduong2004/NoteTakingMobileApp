@@ -13,6 +13,7 @@ import com.example.notetakingmobileapp.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 
 public class Profile extends AppCompatActivity {
 
@@ -21,6 +22,7 @@ public class Profile extends AppCompatActivity {
     private TextView btnLogout, tvName, tvEmail;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
+    private ListenerRegistration userListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,8 +33,21 @@ public class Profile extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
 
         initViews();
-        loadUserInfo();
         setupListeners();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        startListeningUserInfo();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (userListener != null) {
+            userListener.remove();
+        }
     }
 
     private void initViews() {
@@ -44,13 +59,14 @@ public class Profile extends AppCompatActivity {
         tvEmail = findViewById(R.id.tv_profile_email);
     }
 
-    private void loadUserInfo() {
+    private void startListeningUserInfo() {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null) {
             tvEmail.setText(user.getEmail());
-            db.collection("users").document(user.getUid()).get()
-                    .addOnSuccessListener(documentSnapshot -> {
-                        if (documentSnapshot.exists()) {
+            userListener = db.collection("users").document(user.getUid())
+                    .addSnapshotListener((documentSnapshot, error) -> {
+                        if (error != null) return;
+                        if (documentSnapshot != null && documentSnapshot.exists()) {
                             tvName.setText(documentSnapshot.getString("fullName"));
                         }
                     });
@@ -62,6 +78,11 @@ public class Profile extends AppCompatActivity {
 
         btnBuyPremium.setOnClickListener(v -> {
             Intent intent = new Intent(Profile.this, Premium.class);
+            startActivity(intent);
+        });
+
+        btnEditProfile.setOnClickListener(v -> {
+            Intent intent = new Intent(Profile.this, EditProfile.class);
             startActivity(intent);
         });
 
