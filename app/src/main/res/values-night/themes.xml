@@ -1,7 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.NoteTakingMobileApp" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+    <!-- Đổi parent từ DayNight sang Light để ép buộc dùng light theme ngay cả ở chế độ tối -->
+    <style name="Base.Theme.NoteTakingMobileApp" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@color/background</item>
+        <item name="android:windowActivityTransitions">true</item>
     </style>
 </resources>

@@ -2,7 +2,8 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.NoteTakingMobileApp" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="android:windowBackground">@color/background</item>
+        <item name="android:windowActivityTransitions">true</item>
     </style>
 
     <style name="Theme.NoteTakingMobileApp" parent="Base.Theme.NoteTakingMobileApp" />

@@ -7,29 +7,31 @@
     android:layout_height="match_parent"
     tools:context=".Activities.Premium"
     android:background="@color/background">
+
     <TextView
         android:id="@+id/tv_premium"
         android:layout_width="wrap_content"
         android:layout_height="20dp"
-        android:text="Notely Premium"
+        android:layout_marginTop="40dp"
         android:fontFamily="@font/nunito_black"
-        android:textSize="14sp"
+        android:text="CÁ VÀNG NOTE PREMIUM"
         android:textColor="@color/text"
-        android:layout_marginTop="15dp"
+        android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
     </TextView>
 
     <Button
         android:id="@+id/btn_close"
         android:layout_width="25dp"
         android:layout_height="25dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginEnd="28dp"
         android:background="@drawable/ic_close"
-        android:layout_marginTop="15dp"
-        android:layout_marginRight="20dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
     </Button>
 
     <ImageView
@@ -51,7 +53,7 @@
         android:textSize="24dp"
         android:textColor="@color/text"
         android:textAlignment="center"
-        android:text="Start Using Notely with Premium Benefits"
+        android:text="Bắt đầu sử dụng ứng dụng với nhiều tiện ích nâng cấp"
         android:layout_marginTop="15dp"
         app:layout_constraintTop_toBottomOf="@id/img_premium"
         app:layout_constraintStart_toStartOf="parent"
@@ -75,7 +77,7 @@
         android:fontFamily="@font/nunito_black"
         android:textColor="@color/text"
         android:textSize="16sp"
-        android:text="Save unlimited notes to a single project"
+        android:text="Lưu trữ ghi chú không giới hạn"
         android:layout_marginLeft="10dp"
         android:layout_marginTop="25dp"
         app:layout_constraintTop_toBottomOf="@id/tv_slogan"
@@ -99,7 +101,7 @@
         android:fontFamily="@font/nunito_black"
         android:textColor="@color/text"
         android:textSize="16sp"
-        android:text="Create unlimited projects and teams"
+        android:text="Tạo không giới hạn dự án"
         android:layout_marginLeft="10dp"
         android:layout_marginTop="15dp"
         app:layout_constraintTop_toBottomOf="@id/tv_check_1"
@@ -123,7 +125,7 @@
         android:fontFamily="@font/nunito_black"
         android:textColor="@color/text"
         android:textSize="16sp"
-        android:text="Daily backups to keep your data safe"
+        android:text="Lưu trữ hằng ngày"
         android:layout_marginLeft="10dp"
         android:layout_marginTop="15dp"
         app:layout_constraintTop_toBottomOf="@id/tv_check_2"
@@ -158,19 +160,19 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Annual" />
+                android:text="Hàng năm" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="$79.99"
+                android:text="$36.36"
                 android:textSize="24sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="per year" />
+                android:text="Trên một năm" />
         </LinearLayout>
 
         <LinearLayout
@@ -186,9 +188,9 @@
             android:focusable="true"
             android:background="@drawable/bg_pricing_card">
 
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Monthly" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="$7.99" android:textSize="24sp" android:textStyle="bold" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="per month" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Hàng tháng" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="$3.6" android:textSize="24sp" android:textStyle="bold" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Trên một tháng" />
 
         </LinearLayout>
     </LinearLayout>
@@ -198,7 +200,7 @@
         android:layout_width="320dp"
         android:layout_height="75dp"
         android:layout_marginTop="50dp"
-        android:text="SUBSCRIBE"
+        android:text="ĐĂNG KÝ"
         android:fontFamily="@font/nunito_black"
         android:textSize="20sp"
         android:textColor="@color/text_button"
