@@ -61,29 +61,38 @@ public class CreateAccount extends AppCompatActivity {
                 return;
             }
 
+            // Thực hiện đăng ký
             mAuth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
-                            String userId = mAuth.getCurrentUser().getUid();
+                            // Đăng ký thành công, lấy UID
+                            String userId = task.getResult().getUser().getUid();
                             
-                            // Save user info to Firestore
-                            Map<String, Object> user = new HashMap<>();
-                            user.put("fullName", fullName);
-                            user.put("email", email);
+                            // Chuẩn bị dữ liệu user (Loại bỏ avatarUrl như yêu cầu)
+                            Map<String, Object> userMap = new HashMap<>();
+                            userMap.put("fullName", fullName);
+                            userMap.put("email", email);
+                            userMap.put("uid", userId);
 
+                            // Lưu vào Firestore
                             mFirestore.collection("users").document(userId)
-                                    .set(user)
+                                    .set(userMap)
                                     .addOnSuccessListener(aVoid -> {
                                         Toast.makeText(CreateAccount.this, "Account created successfully! Please login.", Toast.LENGTH_SHORT).show();
-                                        // Quay lại trang Login thay vì vào thẳng RecentNotes
-                                        startActivity(new Intent(CreateAccount.this, Login.class));
+                                        // Sau khi tạo thành công, ép người dùng đăng nhập lại để đồng bộ Session
+                                        mAuth.signOut(); 
+                                        Intent intent = new Intent(CreateAccount.this, Login.class);
+                                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                        startActivity(intent);
                                         finish();
                                     })
                                     .addOnFailureListener(e -> {
-                                        Toast.makeText(CreateAccount.this, "Failed to save user data: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                        // Nếu lưu Firestore thất bại (thường do Rules)
+                                        Toast.makeText(CreateAccount.this, "Auth OK, but DB Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
                                     });
                         } else {
-                            Toast.makeText(CreateAccount.this, "Registration failed: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                            // Nếu đăng ký Auth thất bại (Email đã tồn tại, lỗi mạng...)
+                            Toast.makeText(CreateAccount.this, "Auth Failed: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                         }
                     });
         });

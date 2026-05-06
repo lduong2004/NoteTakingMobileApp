@@ -2,14 +2,11 @@ package com.example.notetakingmobileapp.Activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -17,72 +14,88 @@ import com.example.notetakingmobileapp.Adapter.NoteAdapter;
 import com.example.notetakingmobileapp.Database.FirebaseNote;
 import com.example.notetakingmobileapp.R;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RecentNotes extends AppCompatActivity {
-    RecyclerView rvNotes;
-    ImageView imvMenu;
-    FirebaseFirestore db;
-    FirebaseAuth mAuth;
+
+    private RecyclerView rvNotes;
+    private NoteAdapter adapter;
+    private List<FirebaseNote> noteList;
+    private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
+    private ListenerRegistration noteListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_recent_notes);
-        
+
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-
-        imvMenu = findViewById(R.id.imv_menu);
         rvNotes = findViewById(R.id.rvNotes);
-        
         rvNotes.setLayoutManager(new LinearLayoutManager(this));
         
-        findViewById(R.id.fabAdd).setOnClickListener(v -> startActivity(new Intent(this, EditNote.class)));
-        
-        imvMenu.setOnClickListener(v -> {
-            Intent intent = new Intent(RecentNotes.this, Profile.class);
-            startActivity(intent);
+        noteList = new ArrayList<>();
+        adapter = new NoteAdapter(noteList);
+        rvNotes.setAdapter(adapter);
+
+        findViewById(R.id.fabAdd).setOnClickListener(v -> {
+            startActivity(new Intent(this, EditNote.class));
+        });
+
+        findViewById(R.id.imv_menu).setOnClickListener(v -> {
+            startActivity(new Intent(this, Profile.class));
         });
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        loadNotesFromFirestore();
+    protected void onStart() {
+        super.onStart();
+        startListeningNotes();
     }
 
-    private void loadNotesFromFirestore() {
-        if (mAuth.getCurrentUser() == null) {
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (noteListener != null) {
+            noteListener.remove();
+        }
+    }
+
+    private void startListeningNotes() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) {
             startActivity(new Intent(this, GetStarted.class));
             finish();
             return;
         }
 
-        String userId = mAuth.getCurrentUser().getUid();
-
-        db.collection("notes")
-                .whereEqualTo("ownerId", userId)
+        noteListener = db.collection("notes")
+                .whereEqualTo("ownerId", user.getUid())
                 .orderBy("timestamp", Query.Direction.DESCENDING)
                 .addSnapshotListener((value, error) -> {
                     if (error != null) {
-                        Toast.makeText(this, "Error loading notes", Toast.LENGTH_SHORT).show();
+                        Log.e("FirestoreError", "Listen failed.", error);
                         return;
                     }
 
                     if (value != null) {
-                        List<FirebaseNote> notes = value.toObjects(FirebaseNote.class);
-                        rvNotes.setAdapter(new NoteAdapter(notes));
+                        noteList.clear();
+                        for (com.google.firebase.firestore.DocumentSnapshot doc : value.getDocuments()) {
+                            FirebaseNote note = doc.toObject(FirebaseNote.class);
+                            if (note != null) {
+                                note.setId(doc.getId());
+                                noteList.add(note);
+                            }
+                        }
+                        adapter.notifyDataSetChanged();
                     }
                 });
     }
