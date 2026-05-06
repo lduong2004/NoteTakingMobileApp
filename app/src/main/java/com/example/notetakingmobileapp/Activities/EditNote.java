@@ -1,88 +1,94 @@
 package com.example.notetakingmobileapp.Activities;
 
-import android.os.Bundle;
-
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.widget.*;
-import androidx.appcompat.app.AppCompatActivity;
-import java.io.*;
+import android.util.Base64;
+import android.widget.EditText;
+import android.widget.Toast;
 
-import com.example.notetakingmobileapp.Database.AppDatabase;
-import com.example.notetakingmobileapp.Database.Note;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.notetakingmobileapp.Function.DrawingView;
 import com.example.notetakingmobileapp.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.io.ByteArrayOutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 public class EditNote extends AppCompatActivity {
 
-    private int noteId = -1; // -1 nghĩa là đang tạo mới
-    private String existingImagePath = null;
+    private String noteId = null;
+    private EditText etNote;
+    private DrawingView drawingView;
+    private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_note);
 
-        EditText etNote = findViewById(R.id.etNote);
-        DrawingView drawingView = findViewById(R.id.drawingView);
+        db = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
 
-        // KIỂM TRA CHẾ ĐỘ SỬA HAY TẠO MỚI
+        etNote = findViewById(R.id.etNote);
+        drawingView = findViewById(R.id.drawingView);
+
         if (getIntent().hasExtra("NOTE_ID")) {
-            noteId = getIntent().getIntExtra("NOTE_ID", -1);
-
-            // Lấy dữ liệu ghi chú cũ từ DB
-            Note oldNote = AppDatabase.getInstance(this).noteDao().getNoteById(noteId);
-            if (oldNote != null) {
-                // Điền chữ cũ vào EditText
-                etNote.setText(oldNote.content);
-                // Load hình cũ vào khu vực vẽ
-                existingImagePath = oldNote.imagePath;
-                drawingView.loadExistingImage(existingImagePath);
-            }
+            noteId = getIntent().getStringExtra("NOTE_ID");
+            loadNoteData(noteId);
         }
 
-        // XỬ LÝ NÚT LƯU
-        findViewById(R.id.btnSave).setOnClickListener(v -> {
-            // Lưu hình ảnh vẽ trên màn hình thành file
-            String newImagePath = saveBitmap(drawingView.getDrawingBitmap());
+        findViewById(R.id.btnSave).setOnClickListener(v -> saveNoteToFirestore());
+    }
 
-            Note note = new Note();
-            note.content = etNote.getText().toString();
-            note.imagePath = newImagePath != null ? newImagePath : existingImagePath;
-
-            if (noteId == -1) {
-                // Chế độ Tạo mới: Insert
-                AppDatabase.getInstance(this).noteDao().insert(note);
-                Toast.makeText(this, "Đã thêm mới!", Toast.LENGTH_SHORT).show();
-            } else {
-                // Chế độ Sửa: Update
-                note.id = noteId; // Gán đúng ID cũ để nó đè lên dòng cũ
-                AppDatabase.getInstance(this).noteDao().update(note);
-                Toast.makeText(this, "Đã cập nhật!", Toast.LENGTH_SHORT).show();
+    private void loadNoteData(String id) {
+        db.collection("notes").document(id).get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                etNote.setText(documentSnapshot.getString("content"));
+                String drawingBase64 = documentSnapshot.getString("drawingData");
+                if (drawingBase64 != null) {
+                    byte[] decodedString = Base64.decode(drawingBase64, Base64.DEFAULT);
+                    Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                    drawingView.loadExistingImageFromBitmap(decodedByte);
+                }
             }
-            finish();
         });
     }
 
-    private String saveBitmap(Bitmap bmp) {
-        // Có thể tái sử dụng file cũ nếu đang ở chế độ sửa, hoặc tạo file mới
-        File file;
-        if (existingImagePath != null && noteId != -1) {
-            file = new File(existingImagePath); // Ghi đè file ảnh cũ
-        } else {
-            file = new File(getFilesDir(), "img_" + System.currentTimeMillis() + ".png"); // Tạo file mới
-        }
+    private void saveNoteToFirestore() {
+        String content = etNote.getText().toString();
+        String userId = mAuth.getCurrentUser().getUid();
 
-        try (FileOutputStream out = new FileOutputStream(file)) {
-            bmp.compress(Bitmap.CompressFormat.PNG, 100, out);
-            return file.getAbsolutePath();
-        } catch (IOException e) {
-            return null;
+        // Chuyển bản vẽ thành chuỗi Base64 để lưu vào Firestore
+        Bitmap bitmap = drawingView.getDrawingBitmap();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+        String drawingData = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
+
+        Map<String, Object> note = new HashMap<>();
+        note.put("content", content);
+        note.put("drawingData", drawingData);
+        note.put("ownerId", userId);
+        note.put("timestamp", System.currentTimeMillis());
+
+        if (noteId == null) {
+            // Tạo mới
+            db.collection("notes").add(note)
+                    .addOnSuccessListener(documentReference -> {
+                        Toast.makeText(this, "Note saved!", Toast.LENGTH_SHORT).show();
+                        finish();
+                    });
+        } else {
+            // Cập nhật
+            db.collection("notes").document(noteId).set(note)
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(this, "Note updated!", Toast.LENGTH_SHORT).show();
+                        finish();
+                    });
         }
     }
 }

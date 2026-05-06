@@ -31,9 +31,10 @@ public class DrawingView extends View {
         super.onSizeChanged(w, h, oldw, oldh);
         canvasBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         drawCanvas = new Canvas(canvasBitmap);
-        // Nếu có ảnh cũ được truyền vào, vẽ nó lên canvas luôn để có thể vẽ đè lên
         if (loadedBitmap != null) {
-            drawCanvas.drawBitmap(loadedBitmap, 0, 0, canvasPaint);
+            // Scale bitmap to fit canvas if necessary
+            Bitmap scaledBitmap = Bitmap.createScaledBitmap(loadedBitmap, w, h, true);
+            drawCanvas.drawBitmap(scaledBitmap, 0, 0, canvasPaint);
         }
     }
 
@@ -61,11 +62,14 @@ public class DrawingView extends View {
 
     public Bitmap getDrawingBitmap() { return canvasBitmap; }
 
-    public void loadExistingImage(String imagePath) {
-        if (imagePath != null) {
-            // Load file ảnh cũ thành Bitmap
-            loadedBitmap = BitmapFactory.decodeFile(imagePath);
-            invalidate(); // Yêu cầu vẽ lại view
+    public void loadExistingImageFromBitmap(Bitmap bitmap) {
+        if (bitmap != null) {
+            this.loadedBitmap = bitmap;
+            if (drawCanvas != null) {
+                Bitmap scaledBitmap = Bitmap.createScaledBitmap(loadedBitmap, getWidth(), getHeight(), true);
+                drawCanvas.drawBitmap(scaledBitmap, 0, 0, canvasPaint);
+            }
+            invalidate();
         }
     }
 }

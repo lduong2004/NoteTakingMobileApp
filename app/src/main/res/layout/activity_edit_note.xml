@@ -9,6 +9,7 @@
         android:id="@+id/btnSave"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:fontFamily="@font/nunito_bold"
         android:text="LƯU GHI CHÚ" />
 
     <EditText
@@ -16,17 +17,19 @@
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:gravity="top"
+        android:fontFamily="@font/nunito_bold"
         android:hint="Nội dung chữ..." />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:fontFamily="@font/nunito_bold"
         android:text="Vẽ vào đây:" />
 
     <com.example.notetakingmobileapp.Function.DrawingView
         android:id="@+id/drawingView"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="413dp"
         android:layout_weight="1"
         android:background="#EEEEEE" />
 </LinearLayout>
