@@ -2,6 +2,7 @@
     <!-- Base application theme. -->
     <!-- Đổi parent từ DayNight sang Light để ép buộc dùng light theme ngay cả ở chế độ tối -->
     <style name="Base.Theme.NoteTakingMobileApp" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Bạn có thể tùy chỉnh các màu sắc Light Theme tại đây nếu cần -->
+        <item name="android:windowBackground">@color/background</item>
+        <item name="android:windowActivityTransitions">true</item>
     </style>
 </resources>

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -28,6 +29,7 @@ public class EditNote extends AppCompatActivity {
     private DrawingView drawingView;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
+    private ImageButton btnBrush, btnEraser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +41,8 @@ public class EditNote extends AppCompatActivity {
 
         etNote = findViewById(R.id.etNote);
         drawingView = findViewById(R.id.drawingView);
+        btnBrush = findViewById(R.id.btnBrush);
+        btnEraser = findViewById(R.id.btnEraser);
 
         if (getIntent().hasExtra("NOTE_ID")) {
             noteId = getIntent().getStringExtra("NOTE_ID");
@@ -47,10 +51,27 @@ public class EditNote extends AppCompatActivity {
 
         findViewById(R.id.btnSave).setOnClickListener(v -> saveNoteToFirestore());
         
-        // Đảm bảo nút back hoạt động (với ID imv_back trong layout)
         if (findViewById(R.id.imv_back) != null) {
             findViewById(R.id.imv_back).setOnClickListener(v -> finish());
         }
+
+        // Thiết lập bộ công cụ vẽ
+        btnBrush.setOnClickListener(v -> {
+            drawingView.setEraser(false);
+            Toast.makeText(this, "Đã chọn Bút vẽ", Toast.LENGTH_SHORT).show();
+            btnBrush.setBackgroundColor(getResources().getColor(android.R.color.darker_gray));
+            btnEraser.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+        });
+
+        btnEraser.setOnClickListener(v -> {
+            drawingView.setEraser(true);
+            Toast.makeText(this, "Đã chọn Cục tẩy", Toast.LENGTH_SHORT).show();
+            btnEraser.setBackgroundColor(getResources().getColor(android.R.color.darker_gray));
+            btnBrush.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+        });
+
+        // Mặc định chọn bút vẽ
+        btnBrush.performClick();
     }
 
     private void loadNoteData(String id) {
@@ -85,13 +106,11 @@ public class EditNote extends AppCompatActivity {
         String content = etNote.getText().toString().trim();
         String userId = currentUser.getUid();
 
-        // Chuyển bản vẽ thành chuỗi Base64
         String drawingData = "";
         try {
             Bitmap bitmap = drawingView.getDrawingBitmap();
             if (bitmap != null) {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                // Nén ảnh để tránh vượt quá giới hạn 1MB của Firestore document
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 50, baos); 
                 drawingData = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
             }
@@ -103,11 +122,9 @@ public class EditNote extends AppCompatActivity {
         note.put("content", content);
         note.put("drawingData", drawingData);
         note.put("ownerId", userId);
-        // Sử dụng ServerTimestamp để đồng bộ thời gian và khớp với Rules
         note.put("timestamp", FieldValue.serverTimestamp());
 
         if (noteId == null) {
-            // Tạo mới ghi chú
             db.collection("notes").add(note)
                     .addOnSuccessListener(documentReference -> {
                         Toast.makeText(this, "Note saved successfully!", Toast.LENGTH_SHORT).show();
@@ -118,7 +135,6 @@ public class EditNote extends AppCompatActivity {
                         Toast.makeText(this, "Save failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     });
         } else {
-            // Cập nhật ghi chú hiện tại
             db.collection("notes").document(noteId).set(note)
                     .addOnSuccessListener(aVoid -> {
                         Toast.makeText(this, "Note updated successfully!", Toast.LENGTH_SHORT).show();

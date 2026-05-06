@@ -3,15 +3,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@color/background">
 
     <ImageView
         android:id="@+id/imv_back"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:padding="8dp"
-        android:src="@drawable/ic_close"
-        android:contentDescription="Back" />
+        android:src="@drawable/ic_close" />
 
     <Button
         android:id="@+id/btnSave"
@@ -19,15 +19,17 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:fontFamily="@font/nunito_bold"
-        android:text="LƯU GHI CHÚ" />
+        android:text="LƯU GHI CHÚ"
+        android:textColor="@color/text_button"
+        android:background="@drawable/bg_rounded_corner"/>
 
     <EditText
         android:id="@+id/etNote"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:gravity="top"
         android:fontFamily="@font/nunito_bold"
+        android:gravity="top"
         android:hint="Nội dung chữ..." />
 
     <TextView
@@ -36,6 +38,34 @@
         android:layout_marginTop="16dp"
         android:fontFamily="@font/nunito_bold"
         android:text="Vẽ vào đây:" />
+
+    <!-- Tool Palette -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="8dp">
+
+        <ImageButton
+            android:id="@+id/btnBrush"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@android:drawable/ic_menu_edit"
+            android:background="?attr/selectableItemBackground"
+            android:padding="8dp"
+            android:scaleType="fitCenter"/>
+
+        <ImageButton
+            android:id="@+id/btnEraser"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="16dp"
+            android:src="@android:drawable/ic_menu_delete"
+            android:background="?attr/selectableItemBackground"
+            android:padding="8dp"
+            android:scaleType="fitCenter"/>
+    </LinearLayout>
 
     <com.example.notetakingmobileapp.Function.DrawingView
         android:id="@+id/drawingView"

@@ -20,7 +20,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"></TextView>
+        app:layout_constraintTop_toTopOf="parent">
+    </TextView>
 
     <Button
         android:id="@+id/btn_close"
@@ -30,7 +31,8 @@
         android:layout_marginEnd="28dp"
         android:background="@drawable/ic_close"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"></Button>
+        app:layout_constraintTop_toTopOf="parent">
+    </Button>
 
     <ImageView
         android:id="@+id/img_premium"

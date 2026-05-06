@@ -43,7 +43,6 @@ public class RecentNotes extends AppCompatActivity {
         rvNotes.setLayoutManager(new LinearLayoutManager(this));
         
         noteList = new ArrayList<>();
-        // Khởi tạo adapter với listener cho việc xóa note
         adapter = new NoteAdapter(noteList, new NoteAdapter.OnNoteListener() {
             @Override
             public void onDeleteClick(FirebaseNote note) {
@@ -63,20 +62,31 @@ public class RecentNotes extends AppCompatActivity {
 
     private void showDeleteDialog(FirebaseNote note) {
         new AlertDialog.Builder(this)
-                .setTitle("Delete Note")
-                .setMessage("Are you sure you want to delete this note?")
-                .setPositiveButton("Delete", (dialog, which) -> deleteNote(note))
-                .setNegativeButton("Cancel", null)
+                .setTitle("Xóa ghi chú")
+                .setMessage("Bạn có chắc chắn muốn xóa ghi chú này không?")
+                .setPositiveButton("Xóa", (dialog, which) -> deleteNote(note))
+                .setNegativeButton("Hủy", null)
                 .show();
     }
 
     private void deleteNote(FirebaseNote note) {
         if (note.getId() == null) return;
 
+        // Optimistic UI: Xóa khỏi list ngay lập tức để UI cập nhật tức thì
+        int position = noteList.indexOf(note);
+        if (position != -1) {
+            noteList.remove(position);
+            adapter.notifyItemRemoved(position);
+        }
+
         db.collection("notes").document(note.getId())
                 .delete()
-                .addOnSuccessListener(aVoid -> Toast.makeText(RecentNotes.this, "Note deleted", Toast.LENGTH_SHORT).show())
-                .addOnFailureListener(e -> Toast.makeText(RecentNotes.this, "Error deleting note", Toast.LENGTH_SHORT).show());
+                .addOnSuccessListener(aVoid -> Toast.makeText(RecentNotes.this, "Đã xóa ghi chú", Toast.LENGTH_SHORT).show())
+                .addOnFailureListener(e -> {
+                    // Nếu lỗi thì lắng nghe lại để phục hồi dữ liệu
+                    startListeningNotes();
+                    Toast.makeText(RecentNotes.this, "Lỗi khi xóa ghi chú", Toast.LENGTH_SHORT).show();
+                });
     }
 
     @Override
@@ -101,6 +111,8 @@ public class RecentNotes extends AppCompatActivity {
             return;
         }
 
+        if (noteListener != null) noteListener.remove();
+
         noteListener = db.collection("notes")
                 .whereEqualTo("ownerId", user.getUid())
                 .orderBy("timestamp", Query.Direction.DESCENDING)
@@ -119,7 +131,7 @@ public class RecentNotes extends AppCompatActivity {
                                 noteList.add(note);
                             }
                         }
-                        adapter.notifyDataSetChanged();
+                        runOnUiThread(() -> adapter.notifyDataSetChanged());
                     }
                 });
     }
